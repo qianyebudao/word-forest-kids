@@ -607,6 +607,41 @@ button{font:inherit;color:inherit}
 }
 
 /* ============================================================
+   12b. IMPORT DIALOG
+   ============================================================ */
+.side-title-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2);margin-bottom:var(--sp-2)}
+.modal-layer{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:var(--sp-4)}
+.modal-backdrop{position:absolute;inset:0;background:color-mix(in srgb, var(--seed-ink) 46%, transparent)}
+.modal{
+  position:relative;width:min(680px,100%);max-height:min(86vh,780px);
+  display:flex;flex-direction:column;overflow:hidden;
+  border-radius:var(--radius-organic);border-width:3px;
+  animation:modalIn calc(0.28s * var(--seed-motion)) var(--ease-bounce);
+}
+@keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);padding:var(--sp-5) var(--sp-5) 0}
+.modal-title{font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--color-text-title)}
+.modal-body{padding:var(--sp-4) var(--sp-5);overflow:auto;display:flex;flex-direction:column;gap:var(--sp-4)}
+.modal-foot{display:flex;justify-content:flex-end;gap:var(--sp-3);padding:0 var(--sp-5) var(--sp-5)}
+.textarea{height:auto;min-height:158px;padding:var(--sp-3) var(--sp-4);border-radius:var(--radius-card);resize:vertical;font-family:var(--font-display);font-weight:600;line-height:1.7}
+.import-tools{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap}
+.import-count{margin-left:auto;font-family:var(--font-display);font-weight:800;font-size:12.5px;color:var(--color-text-muted)}
+.import-count.has-ok{color:var(--color-success-text)}
+.import-count.has-err{color:var(--color-danger-text)}
+.import-preview{display:flex;flex-direction:column;gap:6px;max-height:186px;overflow:auto;background:var(--color-bg-soft);border:2px solid var(--color-border-soft);border-radius:var(--radius-card);padding:var(--sp-3)}
+.imp-row{display:flex;align-items:baseline;gap:var(--sp-2);font-size:12.5px;font-weight:600;color:var(--color-text-body)}
+.imp-row b{font-family:var(--font-display);font-weight:800;white-space:nowrap}
+.imp-row.is-skip{color:var(--color-text-muted)}
+.imp-row.is-err{color:var(--color-danger-text)}
+.imp-row .imp-line{margin-left:auto;color:var(--color-text-disabled);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:38%}
+.import-hint{font-size:12px;font-weight:600;color:var(--color-text-muted);line-height:1.8}
+.import-hint code{font-family:var(--font-display);font-weight:800;background:var(--color-bg-soft);border-radius:6px;padding:0 5px}
+@media (max-width:640px){
+  .modal-foot{flex-direction:column-reverse}
+  .modal-foot .btn{width:100%}
+}
+
+/* ============================================================
    13. SMALL SCREENS + TOUCH TARGETS
    ============================================================ */
 @media (max-width:640px){
@@ -674,7 +709,13 @@ button{font:inherit;color:inherit}
     <div class="dot-divider" aria-hidden="true"></div>
 
     <div data-component="level-picker">
-      <div class="side-title">选一个词库</div>
+      <div class="side-title-row">
+        <div class="side-title" style="margin-bottom:0">选一个词库</div>
+        <button class="btn btn-outline btn-sm" id="btnOpenImport" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M8 11l4 4 4-4"/><path d="M4 19h16"/></svg>
+          导入
+        </button>
+      </div>
       <div class="level-list" id="levelList"></div>
     </div>
 
@@ -797,6 +838,13 @@ button{font:inherit;color:inherit}
             <div class="mini-title">家长添加生词</div>
             <p class="empty-line">把课本或绘本里遇到的新单词加进遗忘录，孩子下次就能一起练。</p>
           </div>
+          <div class="import-tools">
+            <button class="btn btn-outline btn-sm" id="btnOpenImport2" type="button">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M8 11l4 4 4-4"/><path d="M4 19h16"/></svg>
+              批量导入
+            </button>
+            <span class="empty-line">一次粘贴多行，或选择 txt / csv 文件</span>
+          </div>
           <form class="add-form" id="addForm" novalidate>
             <div class="field" id="fieldEn">
               <label for="inputEn">英文单词</label>
@@ -905,10 +953,47 @@ button{font:inherit;color:inherit}
 
     <div class="tip-card" data-component="tips">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5.9 1.1 1 1.7h5.2c.1-.6.4-1.2 1-1.7A6 6 0 0 0 12 3Z"/></svg>
-      <p><strong>给家长的小提示</strong>学习记录和遗忘录会自动保存在这台设备的浏览器里，下次打开还在；换设备或清除浏览器数据会重新开始，也可以点侧栏的「重置学习记录」手动清空。建议每天练 1 组新词，再把遗忘录过一轮。</p>
+      <p><strong>给家长的小提示</strong>学习记录、遗忘录和你导入的「我的词库」都会自动保存在这台设备的浏览器里，下次打开还在；换设备或清除浏览器数据会重新开始，也可以点侧栏的「重置学习记录」清空进度（导入的词库会保留）。建议每天练 1 组新词，再把遗忘录过一轮。</p>
     </div>
 
   </aside>
+</div>
+
+<div class="modal-layer" id="importModal" hidden role="dialog" aria-modal="true" aria-labelledby="importTitle" data-component="import-dialog">
+  <div class="modal-backdrop" data-close="1"></div>
+  <div class="modal panel">
+    <header class="modal-head">
+      <h2 class="modal-title" id="importTitle">导入单词</h2>
+      <button class="btn btn-outline btn-icon btn-sm" type="button" data-close="1" aria-label="关闭导入窗口">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div class="modal-body">
+      <div class="filter-tabs" role="group" aria-label="导入到哪里">
+        <button class="tab" type="button" data-target="level" aria-pressed="true">导入到「我的词库」</button>
+        <button class="tab" type="button" data-target="forget" aria-pressed="false">直接进遗忘录</button>
+      </div>
+      <div class="field">
+        <label for="importText">每行一个单词</label>
+        <textarea class="input textarea" id="importText" rows="7" spellcheck="false" placeholder="apple 苹果&#10;banana,香蕉&#10;cat | 猫 | /kæt/ | The cat is cute.&#10;# 以 # 开头的行会跳过"></textarea>
+      </div>
+      <div class="import-tools">
+        <button class="btn btn-outline btn-sm" id="btnPickFile" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v11M8 10l4 4 4-4"/><path d="M4 17v3h16v-3"/></svg>
+          选择 txt / csv 文件
+        </button>
+        <input type="file" id="importFile" accept=".txt,.csv,text/plain,text/csv" hidden />
+        <button class="btn btn-outline btn-sm" id="btnClearText" type="button">清空</button>
+        <span class="import-count" id="importCount"></span>
+      </div>
+      <div class="import-preview" id="importPreview" hidden></div>
+      <p class="import-hint">分隔方式支持 <code>空格</code> <code>逗号</code> <code>竖线</code> <code>Tab</code>：第 1 段是英文，第 2 段是中文；可选第 3 段音标（用 /…/ 包住）、第 4 段例句。以 <code>#</code> 开头的行会跳过。</p>
+    </div>
+    <footer class="modal-foot">
+      <button class="btn btn-outline" type="button" data-close="1">取消</button>
+      <button class="btn btn-primary" id="btnImport" type="button" disabled>导入 0 个单词</button>
+    </footer>
+  </div>
 </div>
 
 <div class="toast-layer" id="toastLayer" role="status" aria-live="polite"></div>
@@ -1012,6 +1097,9 @@ var LEVELS = [
    ]}
 ];
 
+var CUSTOM_LEVEL = {id:'custom',name:'我的',tag:'自己导入的单词',hue:'var(--seed-hue-play)',icon:'star',words:[]};
+LEVELS.push(CUSTOM_LEVEL);
+
 function levelById(id){ for(var i=0;i<LEVELS.length;i++){ if(LEVELS[i].id===id) return LEVELS[i]; } return LEVELS[0]; }
 function toWord(arr,levelId){
   return {w:arr[0],ipa:arr[1],zh:arr[2],ex:arr[3],exZh:arr[4],cat:arr[5],level:levelId};
@@ -1069,6 +1157,7 @@ function saveState(){
     window.localStorage.setItem(STORE_KEY, JSON.stringify({
       v:1,
       forget:state.forget,
+      custom:CUSTOM_LEVEL.words,
       orderSeq:state.orderSeq,
       totalKnown:state.totalKnown,
       bestStreak:state.bestStreak,
@@ -1102,6 +1191,13 @@ function loadState(){
         kept[f.w.toLowerCase()] = f;
       }
       state.forget = kept;
+    }
+    if(data.custom && data.custom.length){
+      CUSTOM_LEVEL.words.length = 0;
+      for(var ci=0; ci<data.custom.length; ci++){
+        var row = data.custom[ci];
+        if(row && typeof row[0] === 'string' && row[0] && typeof row[2] === 'string' && row[2]) CUSTOM_LEVEL.words.push(row);
+      }
     }
     state.orderSeq   = typeof data.orderSeq === 'number' ? data.orderSeq : forgetCount();
     state.totalKnown = parseInt(data.totalKnown, 10) || 0;
@@ -1341,7 +1437,7 @@ function renderLevels(){
     html += '<button class="level-btn" type="button" data-level="'+lv.id+'" aria-pressed="'+(on?'true':'false')+'" style="--lvl-color:'+lv.hue+'">'
       + '<span class="level-dot">'+icon(lv.icon,19)+'</span>'
       + '<span style="min-width:0"><span class="level-name">'+esc(lv.name)+'词库</span>'
-      + '<span class="level-meta" style="display:block">'+esc(lv.tag)+' · '+lv.words.length+' 词</span></span>'
+      + '<span class="level-meta" style="display:block">'+esc(lv.tag)+' · '+(lv.id === 'custom' && !lv.words.length ? '点「导入」添加' : lv.words.length+' 词')+'</span></span>'
       + '</button>';
   });
   host.innerHTML = html;
@@ -1441,13 +1537,15 @@ function renderDeck(){
   var deck = $('deck');
   var w = currentWord();
   if(!w){
+    var customEmpty = state.levelId === 'custom' && !CUSTOM_LEVEL.words.length;
     deck.innerHTML = '<div class="deck-empty">'
-      + '<span class="empty-art">'+icon('star',54)+'</span>'
-      + '<h3>这组单词都学完啦</h3>'
-      + '<p>换一个词库继续学新词，或者去遗忘录把生词再练一遍。</p>'
+      + '<span class="empty-art">'+icon(customEmpty ? 'explore' : 'star',54)+'</span>'
+      + '<h3>'+(customEmpty ? '我的词库还是空的' : '这组单词都学完啦')+'</h3>'
+      + '<p>'+(customEmpty ? '把课本、绘本里遇到的单词导入进来，就能开始闯关啦。' : '换一个词库继续学新词，或者去遗忘录把生词再练一遍。')+'</p>'
       + '<div style="display:flex;gap:var(--sp-3);flex-wrap:wrap;justify-content:center">'
-      + '<button class="btn btn-primary" type="button" data-act="restart">再练一组</button>'
-      + '<button class="btn btn-outline" type="button" data-act="to-forget">去遗忘录</button>'
+      + (customEmpty
+          ? '<button class="btn btn-primary" type="button" data-act="import">导入单词</button>'
+          : '<button class="btn btn-primary" type="button" data-act="restart">再练一组</button><button class="btn btn-outline" type="button" data-act="to-forget">去遗忘录</button>')
       + '</div></div>';
     return;
   }
@@ -1642,10 +1740,134 @@ function onUp(){
 }
 
 /* ============================================================
+   IMPORT  (custom words)
+   ============================================================ */
+var importTarget = 'level';
+var importParsed = {ok:[],skip:[],err:[]};
+
+function openImport(){
+  $('importModal').hidden = false;
+  document.body.style.overflow = 'hidden';
+  refreshImportPreview();
+  setTimeout(function(){ var t = $('importText'); if(t) t.focus(); }, 80);
+}
+function closeImport(){
+  $('importModal').hidden = true;
+  document.body.style.overflow = '';
+}
+function inCustom(w){
+  var lw = String(w).toLowerCase();
+  for(var i=0;i<CUSTOM_LEVEL.words.length;i++){ if(CUSTOM_LEVEL.words[i][0].toLowerCase() === lw) return true; }
+  return false;
+}
+function splitImportLine(line){
+  var parts = null;
+  if(line.indexOf('\t') > -1) parts = line.split('\t');
+  else if(line.indexOf('|') > -1) parts = line.split('|');
+  else if(line.indexOf(',') > -1) parts = line.split(',');
+  else if(line.indexOf('，') > -1) parts = line.split('，');
+  else {
+    var m = line.match(/^([A-Za-z][A-Za-z'\- ]*?)\s+(\S.*)$/);
+    if(m) parts = [m[1], m[2]];
+  }
+  if(!parts) return null;
+  return parts.map(function(s){ return s.trim(); });
+}
+function parseImport(text){
+  var ok = [], skip = [], err = [];
+  var seen = {};
+  var lines = String(text).split(/\r?\n/);
+  for(var i=0;i<lines.length;i++){
+    var line = lines[i].trim();
+    if(!line || line.charAt(0) === '#') continue;
+    var parts = splitImportLine(line);
+    if(!parts || parts.length < 2 || !parts[0] || !parts[1]){
+      err.push({line:i+1, text:line, reason:'至少要有「英文 中文」两段'});
+      continue;
+    }
+    var w = parts[0], zh = parts[1], ipa = '', ex = '';
+    if(parts.length > 2 && parts[2].charAt(0) === '/' && parts[2].slice(-1) === '/'){
+      ipa = parts[2];
+      if(parts.length > 3) ex = parts.slice(3).join(', ');
+    }else if(parts.length > 2){
+      ex = parts.slice(2).join(', ');
+    }
+    if(!/^[A-Za-z][A-Za-z'\- ]{0,29}$/.test(w)){ err.push({line:i+1, text:line, reason:'英文部分只能使用字母'}); continue; }
+    if(zh.length > 30){ err.push({line:i+1, text:line, reason:'中文意思太长了'}); continue; }
+    var key = w.toLowerCase();
+    if(seen[key]){ skip.push({line:i+1, text:line, reason:'这一批里重复了'}); continue; }
+    seen[key] = true;
+    if(importTarget === 'level'){
+      if(findBuiltin(w)){ skip.push({line:i+1, text:line, reason:'词库里已经有了'}); continue; }
+      if(inCustom(w)){ skip.push({line:i+1, text:line, reason:'我的词库里已经有了'}); continue; }
+    }else if(state.forget[key]){
+      skip.push({line:i+1, text:line, reason:'遗忘录里已经有了'}); continue;
+    }
+    ok.push({w:w, ipa:ipa, zh:zh, ex:ex, line:i+1});
+  }
+  return {ok:ok, skip:skip, err:err};
+}
+function refreshImportPreview(){
+  importParsed = parseImport($('importText').value);
+  var n = importParsed.ok.length;
+  var btn = $('btnImport');
+  btn.disabled = n === 0;
+  btn.textContent = '导入 ' + n + ' 个单词';
+  var cnt = $('importCount');
+  cnt.textContent = '可导入 ' + n + ' · 跳过 ' + importParsed.skip.length + ' · 无法识别 ' + importParsed.err.length;
+  cnt.className = 'import-count' + (importParsed.err.length ? ' has-err' : (n ? ' has-ok' : ''));
+  var prev = $('importPreview');
+  var rows = importParsed.err.concat(importParsed.skip).slice(0, 40);
+  if(!rows.length){ prev.hidden = true; prev.innerHTML = ''; return; }
+  prev.hidden = false;
+  prev.innerHTML = rows.map(function(r){
+    var isErr = importParsed.err.indexOf(r) > -1;
+    return '<div class="imp-row '+(isErr ? 'is-err' : 'is-skip')+'"><b>第 '+r.line+' 行</b><span>'+esc(r.reason)+'</span><span class="imp-line">'+esc(r.text.slice(0,42))+'</span></div>';
+  }).join('');
+}
+function doImport(){
+  var list = importParsed.ok;
+  if(!list.length) return;
+  var btn = $('btnImport');
+  btn.classList.add('is-loading');
+  setTimeout(function(){
+    btn.classList.remove('is-loading');
+    var added = 0;
+    list.forEach(function(it){
+      if(importTarget === 'level'){
+        CUSTOM_LEVEL.words.push([it.w, it.ipa, it.zh, it.ex, '', 'learn']);
+        added++;
+      }else{
+        var base = findBuiltin(it.w);
+        addForget({
+          w: base ? base.w : it.w,
+          ipa: it.ipa || (base ? base.ipa : ''),
+          zh: it.zh,
+          ex: it.ex || (base ? base.ex : ''),
+          exZh: base ? base.exZh : '',
+          cat: base ? base.cat : 'learn',
+          level: base ? base.level : state.levelId
+        }, 1);
+        added++;
+      }
+    });
+    $('importText').value = '';
+    refreshImportPreview();
+    closeImport();
+    if(importTarget === 'level' && state.levelId === 'custom'){ startNewSession(); }
+    else { renderAll(); }
+    toast(importTarget === 'level' ? ('已导入 '+added+' 个单词到「我的词库」') : ('已导入 '+added+' 个单词到遗忘录'), 'good');
+  }, 380);
+}
+
+/* ============================================================
    EVENTS
    ============================================================ */
 document.addEventListener('click', function(e){
   var t;
+
+  t = e.target.closest('[data-close]');
+  if(t){ closeImport(); return; }
 
   t = e.target.closest('[data-nav]');
   if(t){
@@ -1684,6 +1906,7 @@ document.addEventListener('click', function(e){
   if(t){
     var act = t.getAttribute('data-act');
     if(act === 'speak'){ var w = currentWord(); if(w) speak(w.w + '. ' + (w.ex||'')); return; }
+    if(act === 'import'){ openImport(); return; }
     if(act === 'restart'){ startNewSession(); return; }
     if(act === 'to-forget'){ setView('forget'); renderAll(); return; }
   }
@@ -1744,7 +1967,7 @@ $('speechSwitch').addEventListener('click', function(){
 });
 
 $('btnReset').addEventListener('click', function(){
-  if(!window.confirm('确定要清空遗忘录和全部学习记录吗？这个操作无法撤销。')) return;
+  if(!window.confirm('确定要清空遗忘录和全部学习记录吗？导入的「我的词库」会保留。这个操作无法撤销。')) return;
   resetState();
   startNewSession();
   toast('学习记录已清空，重新开始啦', 'info');
@@ -1800,7 +2023,47 @@ $('addForm').addEventListener('submit', function(e){
   });
 });
 
+/* ---------- import dialog wiring ---------- */
+$('btnOpenImport').addEventListener('click', openImport);
+$('btnOpenImport2').addEventListener('click', openImport);
+$('btnClearText').addEventListener('click', function(){
+  $('importText').value = '';
+  refreshImportPreview();
+  $('importText').focus();
+});
+$('btnPickFile').addEventListener('click', function(){ $('importFile').click(); });
+$('importFile').addEventListener('change', function(){
+  var f = this.files && this.files[0];
+  if(!f) return;
+  if(f.size > 512 * 1024){ toast('文件太大了，请控制在 500KB 以内', 'warn'); this.value = ''; return; }
+  var reader = new FileReader();
+  reader.onload = function(){
+    var txt = String(reader.result || '');
+    if(txt.charCodeAt(0) === 0xFEFF) txt = txt.slice(1);
+    var cur = $('importText').value;
+    $('importText').value = (cur.trim() ? cur.replace(/\s+$/,'') + '\n' : '') + txt;
+    refreshImportPreview();
+    toast('已读入文件「'+f.name+'」，检查一下预览再导入', 'info');
+  };
+  reader.onerror = function(){ toast('文件读取失败，换个文件试试', 'warn'); };
+  reader.readAsText(f, 'utf-8');
+  this.value = '';
+});
+$('importText').addEventListener('input', refreshImportPreview);
+$('btnImport').addEventListener('click', doImport);
+(function(){
+  var tabs = document.querySelectorAll('#importModal [data-target]');
+  for(var i=0;i<tabs.length;i++){
+    tabs[i].addEventListener('click', function(){
+      importTarget = this.getAttribute('data-target');
+      for(var j=0;j<tabs.length;j++) tabs[j].setAttribute('aria-pressed', tabs[j] === this ? 'true' : 'false');
+      refreshImportPreview();
+    });
+  }
+})();
+
 document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape' && !$('importModal').hidden){ closeImport(); return; }
   if(e.target.matches && e.target.matches('input,textarea')) return;
   /* let Space / Enter activate the focused control instead of flipping the card */
   var onControl = e.target.closest && e.target.closest('button,a,[role="switch"]');
@@ -1825,7 +2088,7 @@ var restored = loadState();
 if(!restored) seedForget();
 $('speechSwitch').setAttribute('aria-checked', state.speech ? 'true' : 'false');
 startNewSession();
-toast(restored ? '欢迎回来，你的遗忘录已经帮你留好了' : '欢迎来到单词小森林，大声说出中文意思吧！', 'info');
+toast(restored ? '欢迎回来，你的遗忘录和导入的词库都还在' : '欢迎来到单词小森林，大声说出中文意思吧！', 'info');
 
 })();
 </script>
